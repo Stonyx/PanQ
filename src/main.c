@@ -43,7 +43,7 @@ void usage(void)
 }
 
 // Function called as main entry point
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   if (argc < 2)
   {
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
   scmp_filter_ctx scmp_ctx = configure_seccomp();
 
   // Parse arguments and call sub-commands
-  char *command = argv[1];
+  char* command = argv[1];
   if (strcmp("help", command) == 0)
   {
     usage();
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   else if (strcmp("fan", command) == 0)
   {
     seccomp_load(scmp_ctx);
-    u_int32_t *speed = NULL;
+    u_int32_t* speed = NULL;
     if (argv[2])
     {
       speed = (u_int32_t*) malloc(sizeof(u_int32_t));

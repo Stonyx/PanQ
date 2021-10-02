@@ -40,7 +40,7 @@ void command_check(void)
 }
 
 // Function called to run the fan command
-void command_fan(u_int32_t *speed)
+void command_fan(u_int32_t* speed)
 {
   if (!ensure_it8528())
   {
@@ -66,7 +66,7 @@ void command_fan(u_int32_t *speed)
       exit(EXIT_FAILURE);
     }
 
-    double percent = speed_value / ((double) max_fan_speed - 15) *100;
+    double percent = speed_value / ((double) max_fan_speed - 15) * 100;
     if (percent > 100.0)
     {
       percent = 100;
@@ -133,7 +133,7 @@ void command_log(void)
 }
 
 // Function called to run the LED command
-void command_led(char *mode)
+void command_led(char* mode)
 {
   ensure_io_capability();
 
@@ -170,7 +170,7 @@ void command_led(char *mode)
 
 // Function called to run the test command which compares the PanQ function with the QNAP ones
 //   from the libuLinux_hal.so library
-void command_test(char *libuLinux_hal_path)
+void command_test(char* libuLinux_hal_path)
 {
   bool is_root = (getuid() == 0 && geteuid() == 0);
 
@@ -185,8 +185,8 @@ void command_test(char *libuLinux_hal_path)
     exit(EXIT_FAILURE);
   }
 
-  void *handle;
-  char *error;
+  void* handle;
+  char* error;
 
   handle = dlopen(libuLinux_hal_path, RTLD_LAZY);
   if (!handle)
@@ -263,7 +263,7 @@ void command_test(char *libuLinux_hal_path)
   }
 
   // it8528_get_temperature
-  typedef int8_t(*ec_sys_get_temperature_t)(u_int8_t, double *);
+  typedef int8_t(*ec_sys_get_temperature_t)(u_int8_t, double*);
   ec_sys_get_temperature_t ec_sys_get_temperature = (ec_sys_get_temperature_t) dlsym(handle, "ec_sys_get_temperature");
   error = dlerror();
   if (error != NULL)

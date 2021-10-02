@@ -23,7 +23,7 @@
 #include "it8528_utils.h"
 
 // Function called to get the fan status
-int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t *status_value)
+int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status_value)
 {
   if (fan_id > 5)
   {
@@ -57,7 +57,7 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t *status_value)
 }
 
 // Function called to get the fan PWM value
-int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t *pwm_value)
+int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t* pwm_value)
 {
   u_int8_t tmp_pwm_value = 0;
   u_int8_t command = 0;
@@ -103,7 +103,7 @@ int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t *pwm_value)
 }
 
 // Function called to get the fan RPM value
-int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t *speed_value)
+int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
 {
   u_int8_t byte0;
   u_int8_t byte1;
@@ -171,7 +171,7 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t *speed_value)
 }
 
 // Function called to get the temperature
-int8_t it8528_get_temperature(u_int8_t sensor_id, double *temperature_value)
+int8_t it8528_get_temperature(u_int8_t sensor_id, double* temperature_value)
 {
   u_int8_t command = 0;
 
@@ -323,7 +323,7 @@ int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t fan_speed)
     return ret_value;
   }
 
-  u_int8_t fan_speed_normalized = (fan_speed *100) / 0xFF;
+  u_int8_t fan_speed_normalized = (fan_speed * 100) / 0xFF;
   ret_value = it8528_set_byte(2, command1, fan_speed_normalized);
   if (ret_value != 0)
   {
