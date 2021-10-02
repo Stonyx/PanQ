@@ -1,6 +1,20 @@
-// Copyright (C) 2019 Guillaume Valadon<guillaume@valadon.net>
+/*
+ * Copyright (C) 2021 Stonyx
+ * http://www.stonyx.com
+ *
+ * This script is free software. You can redistribute it and/or modify it under the terms of the GNU
+ * General Public License Version 3 (or at your option any later version) as published by The Free
+ * Software Foundation.
+ *
+ * This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * If you did not received a copy of the GNU General Public License along with this script see
+ * http://www.gnu.org/copyleft/gpl.html or write to The Free Software Foundation, 675 Mass Ave,
+ * Cambridge, MA 02139, USA.
+ */
 
-// panq - utils
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -13,10 +27,9 @@
 #include <seccomp.h>
 #include "utils.h"
 
+// Function called to configure the secure computing mode
 scmp_filter_ctx configure_seccomp(void)
 {
-  // Main seccomp rules
-
   // Configure seccomp filters
   scmp_filter_ctx scmp_ctx = NULL;
 
@@ -63,10 +76,9 @@ scmp_filter_ctx configure_seccomp(void)
   return scmp_ctx;
 }
 
+// Function called to update the secure computing mode
 scmp_filter_ctx update_seccomp(scmp_filter_ctx scmp_ctx)
 {
-  // Test sub-command seccomp rules
-
   int scmp_rules_status = 0;
 
   // Accept any arguments
@@ -94,10 +106,9 @@ scmp_filter_ctx update_seccomp(scmp_filter_ctx scmp_ctx)
   return scmp_ctx;
 }
 
+// Function called to check that privileged I/O port operations are permitted
 void ensure_io_capability(void)
 {
-  // Exits panq if privileged I/O port operations are not permitted
-
   int has_capability = capng_have_capability(CAPNG_EFFECTIVE, CAP_SYS_RAWIO);
   bool is_root = (getuid() == 0 && geteuid() == 0);
 
@@ -109,18 +120,16 @@ void ensure_io_capability(void)
   }
 }
 
+// Function called to read a value from a IT8528 chip register
 u_int8_t sio_read(u_int8_t reg)
 {
-  // Read a value from a IT8528 register
-
   outb(reg, 0x2E);	// address port
   return inb(0x2F);	// data port
 }
 
+// Function called to check if an IT8528 chip is present
 bool ensure_it8528(void)
 {
-  // Check if the Super I/O component is an IT8528
-
   ensure_io_capability();
 
   if (iopl(3) != 0)

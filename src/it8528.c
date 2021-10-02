@@ -1,6 +1,20 @@
-// Copyright (C) 2019 Guillaume Valadon<guillaume@valadon.net>
+/*
+ * Copyright (C) 2021 Stonyx
+ * http://www.stonyx.com
+ *
+ * This script is free software. You can redistribute it and/or modify it under the terms of the GNU
+ * General Public License Version 3 (or at your option any later version) as published by The Free
+ * Software Foundation.
+ *
+ * This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * If you did not received a copy of the GNU General Public License along with this script see
+ * http://www.gnu.org/copyleft/gpl.html or write to The Free Software Foundation, 675 Mass Ave,
+ * Cambridge, MA 02139, USA.
+ */
 
-// panq - IT8528 commands
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/io.h>
@@ -8,6 +22,7 @@
 #include "it8528.h"
 #include "it8528_utils.h"
 
+// Function called to get the fan status
 int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t *status_value)
 {
   if (fan_id > 5)
@@ -41,6 +56,7 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t *status_value)
   return 0;
 }
 
+// Function called to get the fan PWM value
 int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t *pwm_value)
 {
   u_int8_t tmp_pwm_value = 0;
@@ -86,6 +102,7 @@ int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t *pwm_value)
   return 0;
 }
 
+// Function called to get the fan RPM value
 int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t *speed_value)
 {
   u_int8_t byte0;
@@ -153,6 +170,7 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t *speed_value)
   return 0;
 }
 
+// Function called to get the temperature
 int8_t it8528_get_temperature(u_int8_t sensor_id, double *temperature_value)
 {
   u_int8_t command = 0;
@@ -230,6 +248,7 @@ int8_t it8528_get_temperature(u_int8_t sensor_id, double *temperature_value)
   return 0;
 }
 
+// Function called to set the front LED
 int8_t it8528_set_front_usb_led(u_int8_t led_mode)
 {
   int8_t ret_value;
@@ -262,6 +281,7 @@ int8_t it8528_set_front_usb_led(u_int8_t led_mode)
   return 0;
 }
 
+// Function called to set the fan speed
 int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t fan_speed)
 {
   u_int8_t command0, command1;

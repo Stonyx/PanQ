@@ -1,6 +1,20 @@
-// Copyright (C) 2020 Guillaume Valadon<guillaume@valadon.net>
+/*
+ * Copyright (C) 2021 Stonyx
+ * http://www.stonyx.com
+ *
+ * This script is free software. You can redistribute it and/or modify it under the terms of the GNU
+ * General Public License Version 3 (or at your option any later version) as published by The Free
+ * Software Foundation.
+ *
+ * This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * If you did not received a copy of the GNU General Public License along with this script see
+ * http://www.gnu.org/copyleft/gpl.html or write to The Free Software Foundation, 675 Mass Ave,
+ * Cambridge, MA 02139, USA.
+ */
 
-// panq - commands implementations
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,10 +26,9 @@
 #include "it8528.h"
 #include "utils.h"
 
+// Function called to run the check command
 void command_check(void)
 {
-  // Implements the check command
-
   if (ensure_it8528())
   {
     printf("IT8528 detected.\n");
@@ -26,10 +39,9 @@ void command_check(void)
   }
 }
 
+// Function called to run the fan command
 void command_fan(u_int32_t *speed)
 {
-  // Implements the fan command
-
   if (!ensure_it8528())
   {
     exit(EXIT_FAILURE);
@@ -86,10 +98,9 @@ void command_fan(u_int32_t *speed)
   }
 }
 
+// Function called to run the log command which prints the fan speed and the temperature
 void command_log(void)
 {
-  // Print the fan speed and the temperature for logging
-
   if (!ensure_it8528())
   {
     exit(EXIT_FAILURE);
@@ -121,10 +132,9 @@ void command_log(void)
   exit(EXIT_SUCCESS);
 }
 
+// Function called to run the LED command
 void command_led(char *mode)
 {
-  // Implements the led command
-
   ensure_io_capability();
 
   if (!ensure_it8528())
@@ -158,10 +168,10 @@ void command_led(char *mode)
   }
 }
 
+// Function called to run the test command which compares the PanQ function with the QNAP ones
+//   from the libuLinux_hal.so library
 void command_test(char *libuLinux_hal_path)
 {
-  // Test the functions with the native ones from libuLinux_hal.so
-
   bool is_root = (getuid() == 0 && geteuid() == 0);
 
   if (is_root)
@@ -278,10 +288,9 @@ void command_test(char *libuLinux_hal_path)
   dlclose(handle);
 }
 
+// Function called to run the temperature command
 void command_temperature(void)
 {
-  // Implements the temperature command
-
   if (!ensure_it8528())
   {
     exit(EXIT_FAILURE);

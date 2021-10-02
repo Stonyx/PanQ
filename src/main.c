@@ -1,6 +1,20 @@
-// Copyright (C) 2020 Guillaume Valadon<guillaume@valadon.net>
+/*
+ * Copyright (C) 2021 Stonyx
+ * http://www.stonyx.com
+ *
+ * This script is free software. You can redistribute it and/or modify it under the terms of the GNU
+ * General Public License Version 3 (or at your option any later version) as published by The Free
+ * Software Foundation.
+ *
+ * This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * If you did not received a copy of the GNU General Public License along with this script see
+ * http://www.gnu.org/copyleft/gpl.html or write to The Free Software Foundation, 675 Mass Ave,
+ * Cambridge, MA 02139, USA.
+ */
 
-// panq - Interact with the IT8528 Embedded Controller
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,6 +22,7 @@
 #include "utils.h"
 #include <seccomp.h>
 
+// Function called to print the usage information
 void usage(void)
 {
   // Print usage
@@ -27,6 +42,7 @@ void usage(void)
   exit(EXIT_FAILURE);
 }
 
+// Function called as main entry point
 int main(int argc, char **argv)
 {
   if (argc < 2)
@@ -37,7 +53,6 @@ int main(int argc, char **argv)
   scmp_filter_ctx scmp_ctx = configure_seccomp();
 
   // Parse arguments and call sub-commands
-
   char *command = argv[1];
   if (strcmp("help", command) == 0)
   {
