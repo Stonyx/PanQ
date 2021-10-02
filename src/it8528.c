@@ -105,10 +105,11 @@ int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t* pwm_value)
 // Function called to get the fan RPM value
 int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
 {
-  u_int8_t byte0;
-  u_int8_t byte1;
+  // Declare needed variables
+  u_int16_t command0;
+  u_int16_t command1;
 
-  if (ioperm(0x6c, 1, 1) != 0)
+  if (ioperm(0x6C, 1, 1) != 0)
   {
     fprintf(stderr, "it8528_get_fan_speed: ioperm(0x6c) failed!\n");
     return -1;
@@ -120,6 +121,9 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
     return -1;
   }
 
+  // The following switch statement is an exact copy (with the exception of the variable names
+  //   and the default case) of the switch statement found in the libuLinux_hal.so library's
+  //   ec_sys_get_fan_speed function as decompiled by IDA
   switch (fan_id)
   {
     case 0:
@@ -127,21 +131,44 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
     case 2:
     case 3:
     case 4:
-      byte0 = (fan_id *2) + 0x24;
-      byte1 = (fan_id *2) + 0x25;
+    case 5:
+      command0 = 2 * (fan_id + 0x0312);
+      command1 = 2 * fan_id + 0x0625;
       break;
     case 6:
     case 7:
-      byte0 = (fan_id *2) + 0x14;
-      byte1 = (fan_id *2) + 0x15;
+      command0 = 2 * (fan_id + 0x030A);
+      command1 = 2 * (fan_id - 0x06) + 0x621;
       break;
+    // The following fan ID seems to be only valid if in the model.conf file under System IO
+    //   the REDUNDANT_POWER_INFO value is set to yes
     case 10:
-      byte1 = 0x5a;
-      byte0 = 0x5b;
+      command0 = 0x065B;
+      command1 = 0x065A;
       break;
+    // The following fan ID seems to be only valid if in the model.conf file under System IO
+    //   the REDUNDANT_POWER_INFO value is set to yes
     case 11:
-      byte1 = 0x5d;
-      byte0 = 0x5e;
+      command0 = 0x065E;
+      command1 = 0x065D;
+      break;
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+      command0 = 2 * (fan_id + 0x030E);
+      command1 = 2 * (fan_id - 0x14) + 0x0645;
+      break;
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
+      command0 = 2 * (fan_id + 0x02F8);
+      command1 = 2 * (fan_id - 0x1E) + 0x062D;
       break;
     default:
       fprintf(stderr, "it8528_get_fan_speed: invalid fan ID!\n");
@@ -151,7 +178,7 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
   int8_t ret_value;
   u_int8_t tmp_value = 0;
 
-  ret_value = it8528_get_byte(6, byte0, &tmp_value);
+  ret_value = it8528_get_byte(command0 & 0xFF, (command0 >> 8) & 0xFF , &tmp_value);
   if (ret_value != 0)
   {
     fprintf(stderr, "it8528_get_fan_speed: it8528_get_byte() #1 failed!\n");
@@ -159,7 +186,7 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
   }
   *speed_value = ((u_int32_t) tmp_value) << 8;
 
-  ret_value = it8528_get_byte(6, byte1, &tmp_value);
+  ret_value = it8528_get_byte(command1 & 0xFF, (command1 >> 8) & 0xFF, &tmp_value);
   if (ret_value != 0)
   {
     fprintf(stderr, "it8528_get_fan_speed: it8528_get_byte() #2 failed!\n");
