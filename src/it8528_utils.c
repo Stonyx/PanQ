@@ -21,24 +21,32 @@
 #include <time.h>
 #include <unistd.h>
 #include "it8528_utils.h"
-#define IT8528_CHECK_RETRIES 400
-#define IT8528_INPUT_BUFFER_FULL 2
-#define IT8528_OUTPUT_BUFFER_FULL 1
+
+// Define constants
+#define IT8528_WAIT_FOR_READY_RETRIES 400
+#define IT8528_CLEAR_BUFFER_RETRIES 5000
 
 // Function called to check if the IT8528 chip port is ready to be used
-int8_t it8528_check_ready(u_int8_t port, u_int8_t bit_value)
+int8_t it8528_wait_for_ready(u_int8_t port, u_int8_t direction)
 {
-  int retries = IT8528_CHECK_RETRIES;
-  int value = 0;
+  // Declare needed variables
+  int retries = IT8528_WAIT_FOR_READY_RETRIES;
+  int byte;
+  struct timespec ts = {
+    .tv_sec = 0,
+    .tv_nsec = 50000
+  };
 
-  // Poll the bit value
+  // Loop until we get the byte we are waiting for or we run out of retries
   do {
-    value = inb(port);
-    struct timespec ts = {.tv_sec = 0, .tv_nsec = 0x32 * 1000
-    };
+    // Read a byte from the passed in port number
+    byte = inb(port);
+
+    // Sleep for 50 microseconds
     nanosleep(&ts, NULL);
 
-    if ((value & bit_value) == 0)
+    // Check if the read byte has the bit that corresponds to the passed in direction set to 0
+    if ((byte & direction) == 0x00)
     {
       return 0;
     }
@@ -49,21 +57,26 @@ int8_t it8528_check_ready(u_int8_t port, u_int8_t bit_value)
 }
 
 // Function called to clear the IT8528 chip buffers
-u_int8_t it8528_clear_buffer(u_int8_t port)
+int8_t it8528_clear_buffer()
 {
-  // Read byte from port
+  // Declare needed variables
+  int retries = IT8528_CLEAR_BUFFER_RETRIES;
+  int byte;
+  struct timespec ts = {
+    .tv_sec = 0,
+    .tv_nsec = 50000
+  };
 
-  int retries = 5000;
-  int value;
-
- 	// Poll the bit value
+ 	// Loop until we get the byte we are waiting for or we run out of retries
   do {
-    value = inb(0x6C);
-    struct timespec ts = {.tv_sec = 0, .tv_nsec = 0x32 * 1000
-    };
+    // Read a byte from port number 0x6C
+    byte = inb(0x6C);
+
+    // Sleep for 50 microseconds
     nanosleep(&ts, NULL);
 
-    if ((value & 1) != 0)
+    // Check if the read byte has the first bit set to 1
+    if ((byte & 0x01) == 0x01)
     {
       return 0;
     }
@@ -73,130 +86,159 @@ u_int8_t it8528_clear_buffer(u_int8_t port)
   return -1;
 }
 
-// Function called to send the IT8528 chip a command
-int8_t it8528_send_commands(u_int8_t command0, u_int8_t command1)
+// Function called to read a byte from the IT8528 chip
+int8_t it8528_get_byte(u_int8_t command0, u_int8_t command1, u_int8_t* value)
 {
-  int8_t ret_value;
-
-  ret_value = it8528_check_ready(0x6C, IT8528_OUTPUT_BUFFER_FULL);
-  if (ret_value != 0)
+  // Read from port 0x6C and check if the read byte has the first bit set to 1
+  if ((inb(0x6C) & 0x01) == 0x01)
   {
-    fprintf(stderr, "it8528_send_commands(): it8528_check_ready() #1 failed!\n");
-    return ret_value;
-  }
-  inb(0x68);
+    // Clear the chip buffer
+    it8528_clear_buffer();
 
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
-  {
-    fprintf(stderr, "it8528_send_commands(): it8528_check_ready() #2 failed!\n");
-    return ret_value;
-  }
-  outb(0x88, 0x6C);
-
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
-  {
-    fprintf(stderr, "it8528_send_commands(): it8528_check_ready() #3 failed!\n");
-    return ret_value;
-  }
-  outb(command0, 0x68);
-
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
-  {
-    fprintf(stderr, "it8528_send_commands(): it8528_check_ready() #4 failed!\n");
-    return ret_value;
-  }
-  outb(command1, 0x68);
-
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
-  {
-    fprintf(stderr, "it8528_send_commands(): it8528_check_ready() #5 failed!\n");
-    return ret_value;
-  }
-
-  return 0;
-}
-
-// Function called to read a double value from the IT8528 chip
-int8_t it8528_get_double(u_int8_t command0, u_int8_t command1, double *value)
-{
-  int8_t ret_value;
-
-  if ((inb(0x6C) &1) != 0)
-  {
-    it8528_clear_buffer(0x68);
+    // Read from port number 0x68
     inb(0x68);
   }
 
-  ret_value = it8528_send_commands(command0, command1);
-  if (ret_value != 0)
-  {
-    return ret_value;
-  }
-  it8528_clear_buffer(0x68);
-  *value = inb(0x68);
-
-  return 0;
-}
-
-// Function called to read a byte value from the IT8528 chip
-int8_t it8528_get_byte(u_int8_t command0, u_int8_t command1, u_int8_t *value)
-{
-  int8_t ret_value;
-
-  if ((inb(0x6C) &1) != 0)
-  {
-    it8528_clear_buffer(0x68);
-    inb(0x68);
-  }
-
-  ret_value = it8528_send_commands(command0, command1);
-  if (ret_value != 0)
+  // Send the commands
+  if (it8528_send_commands(command0, command1) != 0)
   {
     fprintf(stderr, "it8528_get_byte: it8528_send_commands() failed!\n");
-    return ret_value;
+    return -1;
   }
-  it8528_clear_buffer(0x68);
+
+  // Clear the chip buffer
+  it8528_clear_buffer();
+
+  // Read the byte from port number 0x68
   *value = inb(0x68);
 
   return 0;
 }
 
-// Function called to write a byte value to the IT8528 byte
+// Function called to send a byte to the IT8528 chip
 int8_t it8528_set_byte(u_int8_t command0, u_int8_t command1, u_int8_t value)
 {
-  int8_t ret_value;
-
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
   {
-    return ret_value;
+    fprintf(stderr, "it8528_send_byte(): it8528_wait_for_ready() failed!\n");
+    return -1;
   }
+
+  // Write 0x88 to port number 0x68
   outb(0x88, 0x6C);
 
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
   {
-    return ret_value;
+    fprintf(stderr, "it8528_send_byte(): it8528_wait_for_ready() failed!\n");
+    return -1;
   }
+
+  // Write the first command bitwise ored with 0x80 to port number 0x68
   outb(command0 | 0x80, 0x68);
 
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
   {
-    return ret_value;
+    fprintf(stderr, "it8528_send_byte(): it8528_wait_for_ready() failed!\n");
+    return -1;
   }
+
+  // Write the second command to port number 0x68
   outb(command1, 0x68);
 
-  ret_value = it8528_check_ready(0x6C, IT8528_INPUT_BUFFER_FULL);
-  if (ret_value != 0)
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
   {
-    return ret_value;
+    fprintf(stderr, "it8528_send_byte(): it8528_wait_for_ready() failed!\n");
+    return -1;
   }
+
+  // Write the byte to port number 0x68
   outb(value, 0x68);
+
+  return 0;
+}
+
+// Function called to read a double from the IT8528 chip
+// TODO: rename "value" to something better to match variable name "byte" in above functions
+int8_t it8528_get_double(u_int8_t command0, u_int8_t command1, double* value)
+{
+  // Read from port 0x6C and check if the read byte has the first bit set to 1
+  if ((inb(0x6C) & 0x01) == 0x01)
+  {
+    // Clear the chip buffer
+    it8528_clear_buffer();
+
+    // Read from port number 0x68
+    inb(0x68);
+  }
+
+  // Send the commands
+  if (it8528_send_commands(command0, command1) != 0)
+  {
+    return -1;
+  }
+
+  // Clear the chip buffer
+  it8528_clear_buffer();
+
+  // Read the double from port number 0x68
+  *value = inb(0x68);
+
+  return 0;
+}
+
+// Function called to send commands to the IT8528 chip
+int8_t it8528_send_commands(u_int8_t command0, u_int8_t command1)
+{
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_OUTPUT) != 0)
+  {
+    fprintf(stderr, "it8528_send_commands(): it8528_wait_for_ready() failed!\n");
+    return -1;
+  }
+
+  // Read from port number 0x68
+  inb(0x68);
+
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
+  {
+    fprintf(stderr, "it8528_send_commands(): it8528_wait_for_ready() failed!\n");
+    return -1;
+  }
+
+  // Write 0x88 to port number 0x6C
+  outb(0x88, 0x6C);
+
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
+  {
+    fprintf(stderr, "it8528_send_commands(): it8528_wait_for_ready() failed!\n");
+    return -1;
+  }
+
+  // Write the first command to port number 0x68
+  outb(command0, 0x68);
+
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
+  {
+    fprintf(stderr, "it8528_send_commands(): it8528_wait_for_ready() failed!\n");
+    return -1;
+  }
+
+  // Write the second command to port number 0x68
+  outb(command1, 0x68);
+
+  // Wait until the chip is ready
+  if (it8528_wait_for_ready(0x6C, IT8528_WAIT_FOR_READY_INPUT) != 0)
+  {
+    fprintf(stderr, "it8528_send_commands(): it8528_wait_for_ready() failed!\n");
+    return -1;
+  }
 
   return 0;
 }

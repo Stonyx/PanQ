@@ -31,7 +31,7 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status_value)
     return -1;
   }
 
-  if (ioperm(0x6c, 1, 1) != 0)
+  if (ioperm(0x6C, 1, 1) != 0)
   {
     fprintf(stderr, "it8528_get_fan_status: ioperm(0x6c) failed!\n");
     return -1;
@@ -140,14 +140,14 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
       command0 = 2 * (fan_id + 0x030A);
       command1 = 2 * (fan_id - 0x06) + 0x621;
       break;
-    // The following fan ID seems to be only valid if in the model.conf file under System IO
-    //   the REDUNDANT_POWER_INFO value is set to yes
+    // The following fan ID seems to be only valid if in the model.conf file in the System IO
+    //   section the REDUNDANT_POWER_INFO value is set to yes
     case 10:
       command0 = 0x065B;
       command1 = 0x065A;
       break;
-    // The following fan ID seems to be only valid if in the model.conf file under System IO
-    //   the REDUNDANT_POWER_INFO value is set to yes
+    // The following fan ID seems to be only valid if in the model.conf file in the System IO
+    //   section the REDUNDANT_POWER_INFO value is set to yes
     case 11:
       command0 = 0x065E;
       command1 = 0x065D;
