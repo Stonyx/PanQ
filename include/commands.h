@@ -21,4 +21,4 @@ void command_log(void) __attribute__((noreturn));
 void command_led(char*);
 void command_test(char*);
 void command_temperature(void);
-void usage(void) __attribute__((noreturn));
+void usage(void);

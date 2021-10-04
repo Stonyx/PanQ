@@ -18,9 +18,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/io.h>
-#include <unistd.h>
-#include "it8528.h"
 #include "it8528_utils.h"
+#include "it8528.h"
 
 // Function called to get the fan status
 int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status_value)
@@ -28,18 +27,6 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status_value)
   if (fan_id > 5)
   {
     fprintf(stderr, "it8528_get_fan_status: fan ID too big!\n");
-    return -1;
-  }
-
-  if (ioperm(0x6C, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_fan_status: ioperm(0x6c) failed!\n");
-    return -1;
-  }
-
-  if (ioperm(0x68, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_fan_status: ioperm(0x68) failed!\n");
     return -1;
   }
 
@@ -61,18 +48,6 @@ int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t* pwm_value)
 {
   u_int8_t tmp_pwm_value = 0;
   u_int8_t command = 0;
-
-  if (ioperm(0x6c, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_fan_pwm: ioperm(0x6c) failed!\n");
-    return -1;
-  }
-
-  if (ioperm(0x68, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_fan_pwm: ioperm(0x68) failed!\n");
-    return -1;
-  }
 
   if (fan_id < 0)
   {
@@ -108,18 +83,6 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int32_t* speed_value)
   // Declare needed variables
   u_int16_t command0;
   u_int16_t command1;
-
-  if (ioperm(0x6C, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_fan_speed: ioperm(0x6c) failed!\n");
-    return -1;
-  }
-
-  if (ioperm(0x68, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_fan_speed: ioperm(0x68) failed!\n");
-    return -1;
-  }
 
   // The following switch statement is an exact copy (with the exception of the variable names
   //   and the default case) of the switch statement found in the libuLinux_hal.so library's
@@ -202,18 +165,6 @@ int8_t it8528_get_temperature(u_int8_t sensor_id, double* temperature_value)
 {
   u_int8_t command = 0;
 
-  if (ioperm(0x6c, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_temperature: ioperm(0x6c) failed!\n");
-    return -1;
-  }
-
-  if (ioperm(0x68, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_get_temperature: ioperm(0x68) failed!\n");
-    return -1;
-  }
-
   command = sensor_id;
 
   switch (sensor_id)
@@ -275,39 +226,6 @@ int8_t it8528_get_temperature(u_int8_t sensor_id, double* temperature_value)
   return 0;
 }
 
-// Function called to set the front LED
-int8_t it8528_set_front_usb_led(u_int8_t led_mode)
-{
-  int8_t ret_value;
-
-  if (led_mode > 3)
-  {
-    fprintf(stderr, "it8528_set_front_usb_led: invalid LED mode!\n");
-    return -1;
-  }
-
-  if (ioperm(0x6c, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_set_front_usb_led: ioperm(0x6c) failed!\n");
-    return -1;
-  }
-
-  if (ioperm(0x68, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_set_front_usb_led: ioperm(0x68) failed!\n");
-    return -1;
-  }
-
-  ret_value = it8528_set_byte(1, 0x54, led_mode);
-  if (ret_value != 0)
-  {
-    fprintf(stderr, "it8528_set_front_usb_led: it8528_set_byte() failed!\n");
-    return ret_value;
-  }
-
-  return 0;
-}
-
 // Function called to set the fan speed
 int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t fan_speed)
 {
@@ -316,18 +234,6 @@ int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t fan_speed)
   if (fan_id < 0)
   {
     fprintf(stderr, "it8528_set_fan_speed: invalid fan ID!\n");
-    return -1;
-  }
-
-  if (ioperm(0x6c, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_set_fan_speed: ioperm(0x6c) failed!\n");
-    return -1;
-  }
-
-  if (ioperm(0x68, 1, 1) != 0)
-  {
-    fprintf(stderr, "it8528_set_fan_speed: ioperm(0x68) failed!\n");
     return -1;
   }
 
@@ -355,6 +261,27 @@ int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t fan_speed)
   if (ret_value != 0)
   {
     fprintf(stderr, "it8528_set_fan_speed: it8528_set_byte() failed!\n");
+    return ret_value;
+  }
+
+  return 0;
+}
+
+// Function called to set the front LED
+int8_t it8528_set_front_usb_led(u_int8_t led_mode)
+{
+  int8_t ret_value;
+
+  if (led_mode > 3)
+  {
+    fprintf(stderr, "it8528_set_front_usb_led: invalid LED mode!\n");
+    return -1;
+  }
+
+  ret_value = it8528_set_byte(1, 0x54, led_mode);
+  if (ret_value != 0)
+  {
+    fprintf(stderr, "it8528_set_front_usb_led: it8528_set_byte() failed!\n");
     return ret_value;
   }
 

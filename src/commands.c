@@ -22,14 +22,14 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
-#include "commands.h"
+#include "it8528_utils.h"
 #include "it8528.h"
-#include "utils.h"
+#include "commands.h"
 
 // Function called to run the check command
 void command_check(void)
 {
-  if (ensure_it8528())
+  if (it8528_check_if_present())
   {
     printf("IT8528 detected.\n");
   }
@@ -42,11 +42,6 @@ void command_check(void)
 // Function called to run the fan command
 void command_fan(u_int32_t* speed)
 {
-  if (!ensure_it8528())
-  {
-    exit(EXIT_FAILURE);
-  }
-
   u_int16_t max_fan_speed = 1720;
 
   u_int8_t status_value = 0xFF;
@@ -101,11 +96,6 @@ void command_fan(u_int32_t* speed)
 // Function called to run the log command which prints the fan speed and the temperature
 void command_log(void)
 {
-  if (!ensure_it8528())
-  {
-    exit(EXIT_FAILURE);
-  }
-
   u_int8_t status_value = 0xFF;
   int8_t status_ret = it8528_get_fan_status(0, &status_value);
   if (status_ret != 0 && status_value != 0)
@@ -135,13 +125,6 @@ void command_log(void)
 // Function called to run the LED command
 void command_led(char* mode)
 {
-  ensure_io_capability();
-
-  if (!ensure_it8528())
-  {
-    exit(EXIT_FAILURE);
-  }
-
   u_int8_t led_mode = 0;
   if (strcmp("off", mode) == 0)
   {
@@ -172,16 +155,9 @@ void command_led(char* mode)
 //   from the libuLinux_hal.so library
 void command_test(char* libuLinux_hal_path)
 {
-  bool is_root = (getuid() == 0 && geteuid() == 0);
-
-  if (is_root)
+  if (getuid() == 0 && geteuid() == 0)
   {
     fprintf(stderr, "The test command cannot be used as root!\n");
-    exit(EXIT_FAILURE);
-  }
-
-  if (!ensure_it8528())
-  {
     exit(EXIT_FAILURE);
   }
 
@@ -291,11 +267,6 @@ void command_test(char* libuLinux_hal_path)
 // Function called to run the temperature command
 void command_temperature(void)
 {
-  if (!ensure_it8528())
-  {
-    exit(EXIT_FAILURE);
-  }
-
   double temperature_value = 0;
   if (it8528_get_temperature(0, &temperature_value) != 0)
   {
