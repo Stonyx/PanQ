@@ -6,8 +6,9 @@
  * guillaume@valadon.net
  */
 
-void command_check(void);
-void command_fan(u_int32_t*);
-void command_log(void) __attribute__((noreturn));
-void command_test(char*);
-void command_temperature(void);
+// Declare functions
+void check_command(void);
+void fan_command(u_int8_t fan_id, u_int8_t* speed);
+void log_command(void);
+void test_command(char* libuLinux_hal_path);
+void temperature_command(u_int8_t sensor_id);

@@ -18,74 +18,76 @@
 #include "commands.h"
 
 // Function called to run the check command
-void command_check(void)
+void check_command(void)
 {
+  // Check if the IT8528 chip is present
   if (it8528_check_if_present())
   {
     printf("IT8528 detected.\n");
   }
   else
   {
+    printf("IT8528 not detected.\n");
     exit(EXIT_FAILURE);
   }
 }
 
 // Function called to run the fan command
-void command_fan(u_int32_t* speed)
+void fan_command(u_int8_t fan_id, u_int8_t* speed)
 {
-  u_int16_t max_fan_speed = 1720;
+  // Declare needed variables
+  u_int8_t status;
 
-  u_int8_t status_value = 0xFF;
-  int8_t status_ret = it8528_get_fan_status(0, &status_value);
-  if (status_ret != 0 && status_value != 0)
+  // Get the fan status
+  if (it8528_get_fan_status(0, &status) != 0)
+  {
+    fprintf(stderr, "fan_command: it8528_get_fan_status() failed!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Check the fan status
+  if (status == 0)
   {
     fprintf(stderr, "Incorrect fan status!\n");
     exit(EXIT_FAILURE);
   }
 
+  // Check if no speed was supplied
   if (speed == NULL)
   {
-    u_int16_t speed_value;
-    if (it8528_get_fan_speed(0, &speed_value) != 0)
+    // Declare needed variables
+    u_int16_t rpm;
+
+    // Get the fan RPM
+    if (it8528_get_fan_speed(fan_id, &rpm) != 0)
     {
-      fprintf(stderr, "Can't get fan speed!\n");
+      fprintf(stderr, "fan_command: it8528_get_fan_speed() failed!\n");
       exit(EXIT_FAILURE);
     }
 
-    double percent = speed_value / ((double) max_fan_speed - 15) * 100;
-    if (percent > 100.0)
-    {
-      percent = 100;
-    }
-    printf("%d RPM (~%.2f%%)\n", speed_value, percent);
+    // Print the fan RPM
+    printf("%u RPM\n", rpm);
   }
   else
   {
-
+    // Make sure the speed is valid
     if (*speed > 100)
     {
       fprintf(stderr, "Invalid percent!\n");
       exit(EXIT_FAILURE);
     }
 
-   	// Note: the formula to convert from fan speed to RPM is approximately:
-   	//       rpm = 7 *fan_speed - 17
-
-   	// Convert from fan speed percentage to fan speed
-    float fan_speed = (max_fan_speed * *speed / 100);
-    fan_speed += 17;
-    fan_speed /= 7;
-
-    if (it8528_set_fan_speed(0, (u_int8_t) fan_speed) != 0)
+    // Set the fan speed
+    if (it8528_set_fan_speed(fan_id, *speed) != 0)
     {
-      fprintf(stderr, "Can't set fan speed!\n");
+      fprintf(stderr, "fan_command: it8528_set_fan_speed() failed!\n");
       exit(EXIT_FAILURE);
     }
   }
 }
 
 // Function called to run the log command which prints the fan speed and the temperature
-void command_log(void)
+void log_command(void)
 {
   u_int8_t status_value = 0xFF;
   int8_t status_ret = it8528_get_fan_status(0, &status_value);
@@ -115,7 +117,7 @@ void command_log(void)
 
 // Function called to run the test command which compares the PanQ function with the QNAP ones
 //   from the libuLinux_hal.so library
-void command_test(char* libuLinux_hal_path)
+void test_command(char* libuLinux_hal_path)
 {
   if (getuid() == 0 && geteuid() == 0)
   {
@@ -228,16 +230,18 @@ void command_test(char* libuLinux_hal_path)
 }
 
 // Function called to run the temperature command
-void command_temperature(void)
+void temperature_command(u_int8_t sensor_id)
 {
-  double temperature_value = 0;
-  if (it8528_get_temperature(0, &temperature_value) != 0)
+  // Declare needed variables
+  double temperature;
+
+  // Get the temperature
+  if (it8528_get_temperature(sensor_id, &temperature) != 0)
   {
-    fprintf(stderr, "Can't get the temperature!\n");
+    fprintf(stderr, "temperature_command: it8528_get_temperature failed!\n");
     exit(EXIT_FAILURE);
   }
 
-  // Note: the file /etc/hal_util.conf contains the value ADJUST_SYS_TEMP=-2
-  //       that could mean that this reading needs to be corrected.
-  printf("%.2f °C\n", temperature_value);
+  // Print the temperature
+  printf("%.2f °C\n", temperature);
 }

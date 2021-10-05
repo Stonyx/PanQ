@@ -84,7 +84,7 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status)
           }
 
           // Convert the byte to the status value
-          *status = (((int32_t)byte >> (fan_id - 30)) & 1) == 0;
+          *status = (((int32_t)byte >> (fan_id - 30)) & 0x01) == 0;
         }
       }
       else
@@ -97,7 +97,7 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status)
         }
 
         // Convert the byte to the status value
-        *status = (((int32_t)byte >> (fan_id - 20)) & 1) == 0;
+        *status = (((int32_t)byte >> (fan_id - 20)) & 0x01) == 0;
       }
     }
     else
@@ -110,7 +110,7 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status)
       }
 
       // Convert the byte to the status value
-      *status = (((int32_t)byte >> (fan_id - 6)) & 1) == 0;
+      *status = (((int32_t)byte >> (fan_id - 6)) & 0x01) == 0;
     }
   }
   else
@@ -123,13 +123,13 @@ int8_t it8528_get_fan_status(u_int8_t fan_id, u_int8_t* status)
     }
 
     // Convert the byte to the status value
-    *status = (((int32_t)byte >> fan_id) & 1) == 0;
+    *status = (((int32_t)byte >> fan_id) & 0x01) == 0;
   }
 
   return 0;
 }
 
-// Function called to get the fan PWM value
+// Function called to get the fan PWM
 int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t* pwm)
 {
   // Declare needed variables
@@ -190,7 +190,7 @@ int8_t it8528_get_fan_pwm(u_int8_t fan_id, u_int8_t* pwm)
   return 0;
 }
 
-// Function called to get the fan RPM value
+// Function called to get the fan speed in RPM
 int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int16_t* speed)
 {
   // Declare needed variables
@@ -277,7 +277,7 @@ int8_t it8528_get_fan_speed(u_int8_t fan_id, u_int16_t* speed)
   return 0;
 }
 
-// Function called to set the fan speed
+// Function called to set the fan speed in percentage
 int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t speed)
 {
   // Declare needed variables
@@ -325,7 +325,7 @@ int8_t it8528_set_fan_speed(u_int8_t fan_id, u_int8_t speed)
       return -1;
   }
 
-  // Set a byte  
+  // Set a byte
   if (it8528_set_byte(BYTE1(command1), BYTE2(command1), 0x10) != 0)
   {
     fprintf(stderr, "it8528_set_fan_speed: it8528_set_byte() failed!\n");
@@ -418,6 +418,7 @@ int8_t it8528_get_temperature(u_int8_t sensor_id, double* temperature)
   return 0;
 }
 
+// Function called to get the power supply status
 int8_t i8528_get_power_supply_status(u_int8_t power_supply_id, u_int8_t* status)
 {
   // Check if the power supply ID is valid
@@ -436,7 +437,7 @@ int8_t i8528_get_power_supply_status(u_int8_t power_supply_id, u_int8_t* status)
     // Convert the byte to the status value
     // The following formula is a copy of the formula in the libuLinux_hal.so library's
     //   ec_sys_get_power_supply_status function as decompiled by IDA
-    *status = (((int32_t)byte >> power_supply_id) & 1) == 0;
+    *status = (((int32_t)byte >> power_supply_id) & 0x01) == 0;
   }
   else
   {
