@@ -39,7 +39,6 @@ int8_t it8528_check_if_present(void)
   }
   else
   {
-    fprintf(stderr, "IT8528 not found!\n");
     return -1;
   }
 }

@@ -2,7 +2,7 @@
  * Copyright (C) 2021 Stonyx
  * http://www.stonyx.com
  *
- * Copyright (C) 2020 Guillaume Valadon
+ * Copyright (C) 2019 Guillaume Valadon
  * guillaume@valadon.net
  */
 

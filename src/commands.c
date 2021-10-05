@@ -45,7 +45,7 @@ void command_fan(u_int32_t* speed)
 
   if (speed == NULL)
   {
-    u_int32_t speed_value;
+    u_int16_t speed_value;
     if (it8528_get_fan_speed(0, &speed_value) != 0)
     {
       fprintf(stderr, "Can't get fan speed!\n");
@@ -95,7 +95,7 @@ void command_log(void)
     exit(EXIT_FAILURE);
   }
 
-  u_int32_t speed_value;
+  u_int16_t speed_value;
   if (it8528_get_fan_speed(0, &speed_value) != 0)
   {
     fprintf(stderr, "Can't get fan speed!\n");
@@ -111,35 +111,6 @@ void command_log(void)
   printf("%ld,%d,%.2f\n", time(NULL), speed_value, temperature_value);
 
   exit(EXIT_SUCCESS);
-}
-
-// Function called to run the LED command
-void command_led(char* mode)
-{
-  u_int8_t led_mode = 0;
-  if (strcmp("off", mode) == 0)
-  {
-    led_mode = 0;
-  }
-  else if (strcmp("blink", mode) == 0)
-  {
-    led_mode = 1;
-  }
-  else if (strcmp("on", mode) == 0)
-  {
-    led_mode = 2;
-  }
-  else
-  {
-    fprintf(stderr, "Invalid LED mode!\n");
-    exit(EXIT_FAILURE);
-  }
-
-  if (it8528_set_front_usb_led(led_mode) != 0)
-  {
-    fprintf(stderr, "Can't set the USB LED!\n");
-    exit(EXIT_FAILURE);
-  }
 }
 
 // Function called to run the test command which compares the PanQ function with the QNAP ones
@@ -218,7 +189,8 @@ void command_test(char* libuLinux_hal_path)
   }
 
   int8_t ret_speed_ec, ret_speed_it = 0;
-  u_int32_t value_speed_ec, value_speed_it = 0;
+  u_int32_t value_speed_ec = 0;
+  u_int16_t value_speed_it = 0;
   ret_speed_ec = ec_sys_get_fan_speed(0, &value_speed_ec);
   ret_speed_it = it8528_get_fan_speed(0, &value_speed_it);
   if (ret_speed_ec != ret_speed_it || value_speed_ec != value_speed_it)

@@ -14,6 +14,9 @@
 #include "it8528_utils.h"
 #include "commands.h"
 
+// Declare functions
+void usage(void);
+
 // Function called as main entry point
 int main(int argc, char** argv)
 {
@@ -55,7 +58,7 @@ int main(int argc, char** argv)
     exit(EXIT_FAILURE);
   }
 
-  // Check if the IT8528 chip is present
+  // Check if the IT8528 chip is not present
   if (it8528_check_if_present() != 0)
   {
     fprintf(stderr, "IT8528 chip not found");
@@ -81,18 +84,6 @@ int main(int argc, char** argv)
       *speed = (u_int32_t) strtoul(argv[2], NULL, 10);
     }
     command_fan(speed);
-  }
-  else if (strcmp("led", command) == 0)
-  {
-    if (argv[2])
-    {
-      command_led(argv[2]);
-    }
-    else
-    {
-      fprintf(stderr, "a LED mode is needed!\n");
-      exit(EXIT_FAILURE);
-    }
   }
   else if (strcmp("log", command) == 0)
   {
@@ -130,7 +121,7 @@ void usage(void)
   printf("\n");
   printf("Available commands:\n");
   printf("  check                    - detect the Super I/O controller\n");
-  printf("  fan [SPEED_PERCENTAGE]   - get or set the fan speed\n");
+  printf("  fan [speed_percentage]   - get or set the fan speed\n");
   printf("  help                     - this help message\n");
   printf("  led {on | off | blink}   - configure the front USB LED\n");
   printf("  log                      - display fan speed &temperature\n");
