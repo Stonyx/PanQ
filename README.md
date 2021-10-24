@@ -2,6 +2,8 @@
 
 This is an overhauled version of the `panq` tool originally developed by [guedou](https://github.com/guedou).  Lots of operational help was provided by [r-pufky](https://github.com/r-pufky) to make this happen.
 
+Please note that development on this tool was halted in favor of developing a full hwmon driver kernel module which can be found [here](https://github.com/Stonyx/QNAP-EC).
+
 Below is the original README with some minor alterations.
 
 The `panq` (QNAP reversed) binary provides commands to interact with the ITE IT8528 Super I/O Controller on a many QNAP NAS units.  Its main goals are to read the temperature sensors and to control the fan speeds.  The [lib/libuLinux_hal.so](libuLinux_hal.so) was first reversed with [radare2](https://github.com/radare/radare2), [Ghidra](https://github.com/NationalSecurityAgency/ghidra), and [QBDI](https://qbdi.quarkslab.com/), then the [necessary functions](src/it8528.c) were reimplemented.
